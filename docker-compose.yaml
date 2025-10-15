@@ -1,0 +1,18 @@
+services:
+  mcpo:
+    image: ghcr.io/open-webui/mcpo:main
+    container_name: mcpo
+    ports:
+      - "${MCPO_PORT:-8005}:${MCPO_PORT:-8005}"
+    environment:
+      MCPO_API_KEY: "${MCPO_API_KEY}"
+    command: [
+      "mcpo",
+      "--host","0.0.0.0",
+      "--port","${MCPO_PORT:-8005}",
+      "--api-key","${MCPO_API_KEY}",
+      "--config","/app/config/config.json",
+      "--hot-reload"
+    ]
+    volumes:
+      - ./mcpo:/app/config:ro
