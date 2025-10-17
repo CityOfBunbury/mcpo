@@ -11,3 +11,4 @@ wheels/
 config.json
 .python-version
 .vscode
+.env
