@@ -5,12 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# Changelog
+## [0.0.19] - 2025-10-14
 
-All notable changes to this project will be documented in this file.
+### Fixed
 
-The format is based on Keep a Changelog,
-and this project adheres to Semantic Versioning.
+* 🔁 **Reverted Client Header Forwarding**: Reverted changes introduced in 0.0.18.
+
+## [0.0.18] - 2025-10-14
+
+### Added
+
+* 🧩 **OAuth Support for Streamable HTTP Servers**: Introduced full OAuth 2.0 support with dynamic client registration for 'streamable_http' MCP servers. This enables secure, standards-compliant authentication flows for both user and service clients.
+* 🔧 **Configurable Disabled Tools**: Added 'disabled_tools' option in server configuration, allowing selective disabling of specific tools without modifying code. Useful for managing staged rollouts or limited-access environments.
+* 🧠 **Adjustable Log Level at Runtime**: Logging verbosity can now be adjusted dynamically, giving operators finer control over monitoring and debugging noise without requiring restarts.
+* 🔁 **Client Header Forwarding**: Added automatic forwarding of client HTTP headers to MCP backends—enabling trace propagation, correlation IDs, and richer observability in distributed environments.
+* 🛤️ **Support for Custom Path Prefixes**: Servers can now run under a custom path prefix, allowing flexible deployment within multi-service gateways or reverse proxy environments.
+* 📄 **Root Path Documentation**: Added documentation describing behavior and configuration for root path handling in multi-app or nested setups.
+
+### Changed
+
+* 🧰 **Refactored Connection Timeout Defaults**: Connection timeout is now set to 'None' by default to prevent premature disconnects during long-running or streaming tasks.
+* 🧹 **Removed Deprecated Python Version Tagging**: Dropped explicit Python version tagging; the project now officially supports Python 3.11 and above without manual tagging overhead.
+
+### Fixed
+
+* 🪛 **Improved Hot Reload Lifespan Tracking**: Fixed an issue where sub-applications created during hot reloads were not properly initialized or cleaned up—ensuring stable lifecycle management during dynamic reconfiguration.
+* 🔗 **Symlink Handling in Config Watcher**: Resolved a bug where configuration symlinks were not updating correctly on modification; watcher now tracks and reloads the proper file path automatically.
 
 ## [0.0.17] - 2025-07-22
 
