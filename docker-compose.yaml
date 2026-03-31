@@ -16,3 +16,15 @@ services:
     ]
     volumes:
       - ./mcpo:/app/config:ro
+
+  tp-extractor:
+    build:
+      context: ./tp-extractor
+    container_name: tp-extractor
+    ports:
+      - "8001:8001"
+    environment:
+      - TP_EMAIL=${TP_EMAIL}
+      - TP_PASSWORD=${TP_PASSWORD}
+      - TP_SESSION_COOKIE=${TP_SESSION_COOKIE:-}
+    restart: unless-stopped
