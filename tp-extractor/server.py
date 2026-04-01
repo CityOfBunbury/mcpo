@@ -33,25 +33,6 @@ PII_KEYWORDS = list(PII_FIELDS)
 # Auth helpers
 # ---------------------------------------------------------------------------
 
-def _build_cookies(cookie_val: str) -> list[dict[str, str]]:
-    """Parse TP_SESSION_COOKIE into Playwright cookie dicts."""
-    if not cookie_val:
-        return []
-    if "=" in cookie_val:
-        cookies = []
-        for part in cookie_val.split(";"):
-            part = part.strip()
-            if "=" in part:
-                k, v = part.split("=", 1)
-                cookies.append({
-                    "name": k.strip(),
-                    "value": v.strip(),
-                    "domain": "talentpropeller.com",
-                    "path": "/",
-                })
-        return cookies
-    return [{"name": "PHPSESSID", "value": cookie_val, "domain": "talentpropeller.com", "path": "/"}]
-
 
 async def _try_email_login(browser: Browser) -> tuple[BrowserContext | None, str]:
     """
@@ -124,44 +105,29 @@ async def _authenticate(browser: Browser) -> tuple[BrowserContext, str]:
     """
     Return an authenticated BrowserContext and a description of the method used.
 
-    Priority:
-      1. Email/password login (if TP_EMAIL and TP_PASSWORD are set)
-      2. Session cookie (TP_SESSION_COOKIE)
-
-    Falls back to the next method if the primary fails.
-    The returned description starts with "login" or "cookie" and includes any
-    warning/fallback notes so callers can surface them to the user.
+    Uses email/password login via TP_EMAIL and TP_PASSWORD env vars.
     """
     email = os.environ.get("TP_EMAIL", "")
     password = os.environ.get("TP_PASSWORD", "")
-    cookie_val = os.environ.get("TP_SESSION_COOKIE", "")
 
     if email and password:
         context, err = await _try_email_login(browser)
         if context is not None:
             return context, "login (email/password)"
-        # Login failed — fall back to cookie with a note
-        fallback_note = f" [login failed: {err}]"
-    else:
-        fallback_note = ""
-
-    # Cookie fallback
-    cookies = _build_cookies(cookie_val)
-    context = await browser.new_context(user_agent=USER_AGENT)
-    if cookies:
-        await context.add_cookies(cookies)
-        return context, f"cookie (PHPSESSID){fallback_note}"
+        # Login failed
+        context = await browser.new_context(user_agent=USER_AGENT)
+        return context, f"unauthenticated — login failed: {err}"
 
     # Nothing configured — return an unauthenticated context so callers can
     # surface a useful error message.
-    return context, f"unauthenticated — set TP_EMAIL+TP_PASSWORD or TP_SESSION_COOKIE{fallback_note}"
+    context = await browser.new_context(user_agent=USER_AGENT)
+    return context, "unauthenticated — set TP_EMAIL+TP_PASSWORD"
 
 
 def _no_auth_configured() -> bool:
     email = os.environ.get("TP_EMAIL", "")
     password = os.environ.get("TP_PASSWORD", "")
-    cookie_val = os.environ.get("TP_SESSION_COOKIE", "")
-    return not ((email and password) or cookie_val)
+    return not (email and password)
 
 
 # ---------------------------------------------------------------------------
@@ -227,7 +193,7 @@ async def test_connection() -> str:
                 f"Campaign table (table_list) found: {table_found}",
             ]
             if auth_method.startswith("unauthenticated"):
-                lines.append("WARNING: No credentials configured. Set TP_EMAIL+TP_PASSWORD or TP_SESSION_COOKIE.")
+                lines.append("WARNING: No credentials configured. Set TP_EMAIL+TP_PASSWORD.")
             if not table_found:
                 lines.append("Authentication may have failed — table not found.")
 
@@ -245,7 +211,7 @@ async def list_campaigns() -> str:
     Returns job number, title, branch, opened date, closing date, and applicant count.
     """
     if _no_auth_configured():
-        return "Error: no credentials configured. Set TP_EMAIL+TP_PASSWORD or TP_SESSION_COOKIE."
+        return "Error: no credentials configured. Set TP_EMAIL+TP_PASSWORD."
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -263,7 +229,7 @@ async def list_campaigns() -> str:
             if not table:
                 return (
                     f"Error: campaign table not found (auth: {auth_method}). "
-                    "Credentials may be wrong or the session cookie may have expired."
+                    "Credentials may be wrong."
                 )
 
             rows = table.find_all("tr")
@@ -414,7 +380,7 @@ async def extract_campaign_applicants(campaign_identifier: str) -> str:
     Returns a summary table and PII-stripped detailed JSON.
     """
     if _no_auth_configured():
-        return "Error: no credentials configured. Set TP_EMAIL+TP_PASSWORD or TP_SESSION_COOKIE."
+        return "Error: no credentials configured. Set TP_EMAIL+TP_PASSWORD."
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -436,7 +402,7 @@ async def extract_campaign_applicants(campaign_identifier: str) -> str:
                 if not table:
                     return (
                         f"Error: campaign table not found (auth: {auth_method}). "
-                        "Credentials may be wrong or the session cookie may have expired."
+                        "Credentials may be wrong."
                     )
 
                 ident_lower = campaign_identifier.lower()
@@ -573,4 +539,4 @@ async def extract_campaign_applicants(campaign_identifier: str) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="sse", host="0.0.0.0", port=8001)
+    mcp.run(transport="stdio")
