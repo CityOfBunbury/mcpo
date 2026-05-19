@@ -30,6 +30,7 @@ docker-compose.yml
 .venv/
 venv/
 env/
+bookstack-mcp/node_modules/
 *.egg-info/
 *.dist-info/
 build/

@@ -10,5 +10,6 @@ wheels/
 .venv
 config.json
 .python-version
+bookstack-mcp/node_modules/
 .vscode
 .env

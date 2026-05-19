@@ -29,6 +29,9 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Install mcpo (assuming pyproject.toml is properly configured)
 RUN uv pip install . && rm -rf ~/.cache
 
+# Install bookstack-mcp dependencies
+RUN npm install --prefix /app/bookstack-mcp --omit=dev
+
 # Install tp-extractor dependencies (fastmcp, playwright, beautifulsoup4)
 RUN uv pip install fastmcp beautifulsoup4 playwright && rm -rf ~/.cache
 RUN playwright install --with-deps chromium
