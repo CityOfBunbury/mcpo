@@ -30,7 +30,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN uv pip install . && rm -rf ~/.cache
 
 # Install bookstack-mcp dependencies
-RUN npm install --prefix /app/bookstack-mcp --omit=dev --registry https://registry.npmjs.org
+RUN npm install --prefix /app/bookstack-mcp --omit=dev --userconfig /dev/null
 
 # Install tp-extractor dependencies (fastmcp, playwright, beautifulsoup4)
 RUN uv pip install fastmcp beautifulsoup4 playwright && rm -rf ~/.cache
