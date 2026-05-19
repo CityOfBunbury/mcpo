@@ -11,5 +11,6 @@ wheels/
 config.json
 .python-version
 bookstack-mcp/node_modules/
+bookstack-mcp/package-lock.json
 .vscode
 .env

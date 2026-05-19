@@ -20,7 +20,6 @@ RUN node -v && npm -v
 # Copy your mcpo source code (assuming in src/mcpo)
 COPY . /app
 WORKDIR /app
-RUN echo "=== /app contents ===" && ls /app && echo "=== bookstack-mcp ===" && ls /app/bookstack-mcp 2>/dev/null || echo "MISSING"
 
 # Create virtual environment explicitly in known location
 ENV VIRTUAL_ENV=/app/.venv
@@ -32,7 +31,7 @@ RUN uv pip install . && rm -rf ~/.cache
 
 # Install bookstack-mcp dependencies
 RUN rm -f /root/.npmrc /etc/npmrc && \
-    npm install --prefix /app/bookstack-mcp --omit=dev --userconfig /dev/null --globalconfig /dev/null
+    npm install --prefix /app/bookstack-mcp --omit=dev --no-package-lock --userconfig /dev/null --globalconfig /dev/null
 
 # Install tp-extractor dependencies (fastmcp, playwright, beautifulsoup4)
 RUN uv pip install fastmcp beautifulsoup4 playwright && rm -rf ~/.cache
